@@ -99,10 +99,6 @@ def load_game(is_popup_enabled=True):  # Use the new flag for popup control
         # Now update the buttons and UI after loading game data
         update_ui_buttons()  # Custom function to update buttons based on loaded data
 
-        # Start the bps thread only if it's not already running
-        if game_data.get("bps_running", False):  
-            threading.Thread(target=bits_per_second, daemon=True).start()
-
         # Save updated data (if new default values were added)
         save_game(show_popup=False)  # Save silently (no popup)
 
@@ -144,10 +140,24 @@ def update_ui():
     if root.winfo_exists():
         root.after(1000, update_ui)  # Update every second
 
-        #          total bits/s                             bits/s                          bits/s x                           ((x numbers in bits) ^ 0.3) ^ (bits/s scaling / 5)
-        game_data['total_bits_second'] = int(int(game_data['bits_second']) * int(game_data['bits_second_multiplier']) * int(((len(str(game_data['bits']))**0.8)**(game_data['bits_second_scaling']/5))))
-        #          total bits/click                            bits/click                         bits/click x                ((total_bits/s) ^ 0.8) ^ (bits/click scaling / 5)
-        game_data['total_bits_click'] = int(int(game_data.get('bits_click')) * int(game_data.get('bits_click_multiplier')) * int(((game_data['total_bits_second'])**0.8)**game_data['bits_click_scaling']))
+#         game_data['total_bits_second'] = max(1, 
+#     int(game_data['bits_second']) * 
+#     int(game_data['bits_second_multiplier']) * 
+#     int(((len(str(max(1, game_data['bits'])))**0.8) ** (game_data['bits_second_scaling'] / 5)) if game_data['bits_second_scaling'] > 0 else 1)
+# ) 
+        try:
+            scaling_factor = ((len(str(max(1, game_data['bits']))) ** 0.8) ** (game_data['bits_second_scaling'] / 5)) if game_data['bits_second_scaling'] > 0 else 1
+            game_data['total_bits_second'] = max(1, int(game_data['bits_second']) * int(game_data['bits_second_multiplier']) * int(scaling_factor))
+        except Exception as e:
+            print(f"Error in total_bits_second calculation: {e}")
+            game_data['total_bits_second'] = 1
+
+        game_data['total_bits_click'] = max(1, 
+    int(game_data.get('bits_click', 1)) * 
+    int(game_data.get('bits_click_multiplier', 1)) * 
+    int(((game_data['total_bits_second'] ** 0.8) ** game_data['bits_click_scaling']) if game_data['bits_click_scaling'] > 0 else 1)
+)
+
 
         label.config(text=f"Your bits {safe_millify(game_data['bits'])}")
 
@@ -165,22 +175,6 @@ def on_THE_button_click():  # on THE button click
     game_data['bits'] += game_data['total_bits_click']
     label.config(text=f"Your bits {safe_millify(game_data['bits'])}")
 
-def bits_per_second():
-    while game_data.get("bps_running", False):
-        if root.winfo_exists():  # Only update if the window is still open
-            pass
-        else:
-            break  # Exit loop if root is closed
-
-        if game_data['total_bits_second'] >= 10:
-            sleep(0.1)
-            game_data['bits'] += int(game_data['total_bits_second'] / 10)
-        else:
-            sleep(1)
-            game_data['bits'] += game_data['total_bits_second']
-        label.config(text=f"Your bits {safe_millify(game_data['bits'])}")
-
-
 def action_1(button):
     if game_data['bits'] >= game_data['bits_click_price']:
         game_data['bits'] -= game_data['bits_click_price']
@@ -197,12 +191,7 @@ def action_2(button):
         game_data['auto_cost'] += int((game_data['auto_cost'] ** 0.5) * 10)
         game_data['bits_second'] += 1
 
-        button.config(text=f"bits/s - {millify(game_data['auto_cost'], precision=2)}")
-
-        # Restart bits_per_second thread if not running
-        if not game_data.get("bps_running", False):  
-            game_data["bps_running"] = True
-            threading.Thread(target=bits_per_second, daemon=True).start()
+        button.config(text=f"bits/s - {safe_millify(game_data['auto_cost'])}")
 
     else:
         original_text = button.cget("text")
@@ -376,21 +365,21 @@ quit_button.pack(side="left", padx=5, pady=2)
 
 # Define the button texts, grid positions, and the associated action functions
 buttons_info = [
-    (f"bits/click - {millify(game_data['bits_click_price'], precision=2)}", 2, 0, action_1, 'bits_click_price'),
-    (f"bits/s - {millify(game_data['auto_cost'], precision=2)}", 2, 1, action_2, 'auto_cost'),
-    (f"bits/click multiplier - {millify(game_data['bits_click_multiplier_price'], precision=2)}", 2, 2, action_3, 'bits_click_multiplier_price'),
-    (f"bits/s multiplier - {millify(game_data['bits_second_multiplier_price'], precision=2)}", 3, 0, action_4, 'bits_second_multiplier_price'),
-    (f" - {millify(game_data['intelligence'], precision=2)}", 3, 1, action_5, 'intelligence'),
-    (f" - {millify(game_data['defense'], precision = 2)}", 3, 2, action_6, 'defense'),
-    (f" - {millify(game_data['experience'], precision = 2)}", 4, 0, action_7, 'experience'),
-    (f" - {millify(game_data['gold'], precision = 2)}", 4, 1, action_8, 'gold'),
-    (f" - {millify(game_data['gems'], precision = 2)}", 4, 2, action_9, 'gems'),
-    (f" - {millify(game_data['stamina'], precision = 2)}", 5, 0, action_10, 'stamina'),
-    (f" - {millify(game_data['power'], precision = 2)}", 5, 1, action_11, 'power'),
-    (f" - {millify(game_data['strength'], precision = 2)}", 5, 2, action_12, 'strength'),
-    (f" - {millify(game_data['agility'], precision = 2)}", 6, 0, action_13, 'agility'),
-    (f"bits/click scaling - {millify(game_data['bits_click_scaling_price'], precision=2)}", 6, 1, action_14, 'bits_click_scaling_price'),
-    (f"bits/s scaling - {millify(game_data['bits_second_scaling_price'], precision=2)}", 6, 2, action_15, 'bits_second_scaling_price'),
+    (f"{safe_millify(game_data['bits_click_price'])}", 2, 0, action_1, 'bits_click_price'),
+    (f"{safe_millify(game_data['auto_cost'])}", 2, 1, action_2, 'auto_cost'),
+    (f"{safe_millify(game_data['bits_click_multiplier_price'])}", 2, 2, action_3, 'bits_click_multiplier_price'),
+    (f"{safe_millify(game_data['bits_second_multiplier_price'])}", 3, 0, action_4, 'bits_second_multiplier_price'),
+    (f"{safe_millify(game_data['intelligence'])}", 3, 1, action_5, 'intelligence'),
+    (f"{safe_millify(game_data['defense'])}", 3, 2, action_6, 'defense'),
+    (f"{safe_millify(game_data['experience'])}", 4, 0, action_7, 'experience'),
+    (f"{safe_millify(game_data['gold'])}", 4, 1, action_8, 'gold'),
+    (f"{safe_millify(game_data['gems'])}", 4, 2, action_9, 'gems'),
+    (f"{safe_millify(game_data['stamina'])}", 5, 0, action_10, 'stamina'),
+    (f"{safe_millify(game_data['power'])}", 5, 1, action_11, 'power'),
+    (f"{safe_millify(game_data['strength'])}", 5, 2, action_12, 'strength'),
+    (f"{safe_millify(game_data['agility'])}", 6, 0, action_13, 'agility'),
+    (f"{safe_millify(game_data['bits_click_scaling_price'])}", 6, 1, action_14, 'bits_click_scaling_price'),
+    (f"{safe_millify(game_data['bits_second_scaling_price'])}", 6, 2, action_15, 'bits_second_scaling_price'),
 ]
 
 buttons = []  # Store button instances
@@ -407,7 +396,7 @@ for button_text, row, col, action_function, variable in buttons_info:
     formatted_text = button_text.format(**game_data)
 
     # Create button instance with the formatted text
-    button = ttk.Button(root, text=formatted_text)
+    button = ttk.Button(root, text=formatted_text, command=lambda: action_function(button))
 
     # Assign the action function for the button
     button.config(command=lambda b=button, act=action_function: act(b))
@@ -425,6 +414,21 @@ for button_text, row, col, action_function, variable in buttons_info:
     
     buttons.append(button)  # Store the button instance
 
+
 root.after(1, load_game)  # Load game after 100ms
-update_ui()
+
+def update_bits():
+    while True:
+        game_data["bits"] += game_data["total_bits_second"]
+        root.after(0, update_ui)  # Safe UI update from the thread
+        sleep(1)
+
+
+# Start the background thread
+thread = threading.Thread(target=update_bits, daemon=True)
+thread.start()
+
+# Start UI updates
+root.after(1000, update_ui)
+
 root.mainloop()

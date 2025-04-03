@@ -126,7 +126,7 @@ def show_popup(title, message):
 
 def update_ui_buttons():
     for button, (_, _, _, action_function, variable) in zip(buttons, buttons_info):
-        button.config(text=f"{variable.replace('_', ' ').capitalize()} - {millify(game_data[variable], precision=2)}")
+        button.config(text=f"{variable.replace('_', ' ').capitalize()} - {safe_millify(game_data[variable])}")
 
 def rename(button, original_text):
     button.config(text="Not enough bits!", state="disabled")  # Disable & change color
@@ -182,11 +182,12 @@ def bits_per_second():
 
 
 def action_1(button):
+    print(buttons)
     if game_data['bits'] >= game_data['bits_click_price']:
         game_data['bits'] -= game_data['bits_click_price']
         game_data['bits_click_price'] += int((game_data['bits_click_price']**0.5)*10)
         game_data['bits_click'] += 1
-        button.config(text=f"bits/click - {millify(game_data['bits_click_price'], precision=2)}")
+        button.config(text=f"bits/click - {safe_millify(game_data['bits_click_price'])}")
     elif game_data['bits'] < game_data['bits_click_price']:
         original_text = button.cget("text")
         threading.Thread(target=rename, args=(button, original_text), daemon=True).start()
@@ -197,7 +198,7 @@ def action_2(button):
         game_data['auto_cost'] += int((game_data['auto_cost'] ** 0.5) * 10)
         game_data['bits_second'] += 1
 
-        button.config(text=f"bits/s - {millify(game_data['auto_cost'], precision=2)}")
+        button.config(text=f"bits/s - {safe_millify(game_data['auto_cost'])}")
 
         # Restart bits_per_second thread if not running
         if not game_data.get("bps_running", False):  
@@ -213,7 +214,7 @@ def action_3(button):
         game_data['bits'] -= game_data['bits_click_multiplier_price']
         game_data['bits_click_multiplier_price'] += int((game_data['bits_click_multiplier_price'] ** 0.5) * 50)
         game_data['bits_click_multiplier'] += 1
-        button.config(text=f"bits/click multiplier - {millify(game_data['bits_click_multiplier_price'], precision=2)}")
+        button.config(text=f"bits/click multiplier - {safe_millify(game_data['bits_click_multiplier_price'])}")
     
     else:
         original_text = button.cget("text")
@@ -224,7 +225,7 @@ def action_4(button):
         game_data['bits'] -= game_data['bits_second_multiplier_price']
         game_data['bits_second_multiplier_price'] += int((game_data['bits_second_multiplier_price'] ** 0.5) * 60)
         game_data['bits_second_multiplier'] += 1
-        button.config(text=f"bits/s multiplier - {millify(game_data['bits_second_multiplier_price'], precision=2)}")
+        button.config(text=f"bits/s multiplier - {safe_millify(game_data['bits_second_multiplier_price'])}")
     
     else:
         original_text = button.cget("text")
@@ -233,7 +234,7 @@ def action_4(button):
 def action_5(button):
     if game_data['bits'] >= game_data['intelligence']:
         game_data['intelligence'] += 2
-        button.config(text=f" - {millify(game_data['intelligence'], precision=2)}")
+        button.config(text=f" - {safe_millify(game_data['intelligence'])}")
     
     else:
         original_text = button.cget("text")
@@ -242,7 +243,7 @@ def action_5(button):
 def action_6(button):
     if game_data['bits'] >= game_data['intelligence']:
         game_data['defense'] += 4
-        button.config(text=f" - {millify(game_data['defense'], precision=2)}")
+        button.config(text=f" - {safe_millify(game_data['defense'])}")
 
     else:
         original_text = button.cget("text")
@@ -251,7 +252,7 @@ def action_6(button):
 def action_7(button):
     if game_data['bits'] >= game_data['intelligence']:
             game_data['experience'] += 20
-            button.config(text=f" - {millify(game_data['experience'], precision=2)}")
+            button.config(text=f" - {safe_millify(game_data['experience'])}")
 
     else:
         original_text = button.cget("text")
@@ -260,7 +261,7 @@ def action_7(button):
 def action_8(button):
     if game_data['bits'] >= game_data['intelligence']:
         game_data['gold'] += 50
-        button.config(text=f" - {millify(game_data['gold'], precision=2)}")
+        button.config(text=f" - {safe_millify(game_data['gold'])}")
 
     else:
         original_text = button.cget("text")
@@ -269,7 +270,7 @@ def action_8(button):
 def action_9(button):
     if game_data['bits'] >= game_data['intelligence']:
         game_data['gems'] += 1
-        button.config(text=f" - {millify(game_data['gems'], precision=2)}")
+        button.config(text=f" - {safe_millify(game_data['gems'])}")
 
     else:
         original_text = button.cget("text")
@@ -278,7 +279,7 @@ def action_9(button):
 def action_10(button):
     if game_data['bits'] >= game_data['intelligence']:
         game_data['stamina'] += 10
-        button.config(text=f" - {millify(game_data['stamina'], precision=2)}")
+        button.config(text=f" - {safe_millify(game_data['stamina'])}")
 
     else:
         original_text = button.cget("text")
@@ -287,7 +288,7 @@ def action_10(button):
 def action_11(button):
     if game_data['bits'] >= game_data['intelligence']:
         game_data['power'] += 2
-        button.config(text=f" - {millify(game_data['power'], precision=2)}")
+        button.config(text=f" - {safe_millify(game_data['power'])}")
 
     else:
         original_text = button.cget("text")
@@ -296,7 +297,7 @@ def action_11(button):
 def action_12(button):
     if game_data['bits'] >= game_data['intelligence']:
         game_data['strength'] += 1
-        button.config(text=f" - {millify(game_data['strength'], precision=2)}")
+        button.config(text=f" - {safe_millify(game_data['strength'])}")
 
     else:
         original_text = button.cget("text")
@@ -305,7 +306,7 @@ def action_12(button):
 def action_13(button):
     if game_data['bits'] >= game_data['intelligence']:
         game_data['agility'] += 3
-        button.config(text=f" - {millify(game_data['agility'], precision=2)}")
+        button.config(text=f" - {safe_millify(game_data['agility'])}")
 
     else:
         original_text = button.cget("text")
@@ -316,7 +317,7 @@ def action_14(button):
         game_data['bits'] -= game_data['bits_click_scaling_price']
         game_data['bits_click_scaling'] += 1
         game_data['bits_click_scaling_price'] += int((game_data['bits_click_scaling_price'] ** 0.5) * 500)
-        button.config(text=f"bits/click scaling - {millify(game_data['bits_click_scaling_price'], precision=2)}")
+        button.config(text=f"bits/click scaling - {safe_millify(game_data['bits_click_scaling_price'])}")
 
     else:
         original_text = button.cget("text")
@@ -327,7 +328,7 @@ def action_15(button):
         game_data['bits'] -= game_data['bits_second_scaling_price']
         game_data['bits_second_scaling'] += 1
         game_data['bits_second_scaling_price'] += int(game_data['bits_second_scaling_price'] * 2.7)
-        button.config(text=f"bits/s scaling - {millify(game_data['bits_second_scaling_price'], precision=2)}")
+        button.config(text=f"bits/s scaling - {safe_millify(game_data['bits_second_scaling_price'])}")
 
     else:
         original_text = button.cget("text")
@@ -336,7 +337,7 @@ def action_15(button):
 label = ttk.Label(root, text = "Clicker Game", font=("Arial", 32))
 label.grid(row=0, column=0, columnspan = 3)
 
-info_stats = ttk.Label(root, text = f"bits/click - {millify(game_data['bits'], precision=2)}\nbits/s - {game_data['bits_second']}", anchor="ne", justify="right")
+info_stats = ttk.Label(root, text = "bits/click - \nbits/s - ", anchor="ne", justify="right")
 info_stats.grid(row=0, column=2, sticky="ne", padx=10, pady=10)
 
 # Configure the grid to expand and fill the space
@@ -376,21 +377,21 @@ quit_button.pack(side="left", padx=5, pady=2)
 
 # Define the button texts, grid positions, and the associated action functions
 buttons_info = [
-    (f"bits/click - {millify(game_data['bits_click_price'], precision=2)}", 2, 0, action_1, 'bits_click_price'),
-    (f"bits/s - {millify(game_data['auto_cost'], precision=2)}", 2, 1, action_2, 'auto_cost'),
-    (f"bits/click multiplier - {millify(game_data['bits_click_multiplier_price'], precision=2)}", 2, 2, action_3, 'bits_click_multiplier_price'),
-    (f"bits/s multiplier - {millify(game_data['bits_second_multiplier_price'], precision=2)}", 3, 0, action_4, 'bits_second_multiplier_price'),
-    (f" - {millify(game_data['intelligence'], precision=2)}", 3, 1, action_5, 'intelligence'),
-    (f" - {millify(game_data['defense'], precision = 2)}", 3, 2, action_6, 'defense'),
-    (f" - {millify(game_data['experience'], precision = 2)}", 4, 0, action_7, 'experience'),
-    (f" - {millify(game_data['gold'], precision = 2)}", 4, 1, action_8, 'gold'),
-    (f" - {millify(game_data['gems'], precision = 2)}", 4, 2, action_9, 'gems'),
-    (f" - {millify(game_data['stamina'], precision = 2)}", 5, 0, action_10, 'stamina'),
-    (f" - {millify(game_data['power'], precision = 2)}", 5, 1, action_11, 'power'),
-    (f" - {millify(game_data['strength'], precision = 2)}", 5, 2, action_12, 'strength'),
-    (f" - {millify(game_data['agility'], precision = 2)}", 6, 0, action_13, 'agility'),
-    (f"bits/click scaling - {millify(game_data['bits_click_scaling_price'], precision=2)}", 6, 1, action_14, 'bits_click_scaling_price'),
-    (f"bits/s scaling - {millify(game_data['bits_second_scaling_price'], precision=2)}", 6, 2, action_15, 'bits_second_scaling_price'),
+    (f"{safe_millify(game_data['bits_click_price'])}", 2, 0, action_1, 'bits_click_price'),
+    (f"{safe_millify(game_data['auto_cost'])}", 2, 1, action_2, 'auto_cost'),
+    (f"{safe_millify(game_data['bits_click_multiplier_price'])}", 2, 2, action_3, 'bits_click_multiplier_price'),
+    (f"{safe_millify(game_data['bits_second_multiplier_price'])}", 3, 0, action_4, 'bits_second_multiplier_price'),
+    (f"{safe_millify(game_data['intelligence'])}", 3, 1, action_5, 'intelligence'),
+    (f"{safe_millify(game_data['defense'])}", 3, 2, action_6, 'defense'),
+    (f"{safe_millify(game_data['experience'])}", 4, 0, action_7, 'experience'),
+    (f"{safe_millify(game_data['gold'])}", 4, 1, action_8, 'gold'),
+    (f"{safe_millify(game_data['gems'])}", 4, 2, action_9, 'gems'),
+    (f"{safe_millify(game_data['stamina'])}", 5, 0, action_10, 'stamina'),
+    (f"{safe_millify(game_data['power'])}", 5, 1, action_11, 'power'),
+    (f"{safe_millify(game_data['strength'])}", 5, 2, action_12, 'strength'),
+    (f"{safe_millify(game_data['agility'])}", 6, 0, action_13, 'agility'),
+    (f"{safe_millify(game_data['bits_click_scaling_price'])}", 6, 1, action_14, 'bits_click_scaling_price'),
+    (f"{safe_millify(game_data['bits_second_scaling_price'])}", 6, 2, action_15, 'bits_second_scaling_price'),
 ]
 
 buttons = []  # Store button instances
@@ -425,6 +426,9 @@ for button_text, row, col, action_function, variable in buttons_info:
     
     buttons.append(button)  # Store the button instance
 
+
 root.after(1, load_game)  # Load game after 100ms
-update_ui()
+thread = threading.Thread(target=update_ui, daemon=True)
+thread.start()
+# update_ui()
 root.mainloop()
