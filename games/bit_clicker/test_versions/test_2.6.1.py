@@ -135,32 +135,48 @@ def rename(button, original_text):
     sleep(1)
     button.config(text=original_text, state="normal")  # Restore default color
 
+def safe_millify(value):
+    try:
+        return millify(value, precision=2)
+    except Exception as e:
+        print(f"Error formatting number: {e}")
+        return str(value)  # Return raw number if formatting fails
+
+def update_ui():
+    if root.winfo_exists():
+        root.after(1000, update_ui)  # Update every second
+
+
+        info_stats.config(text=(
+            f"bits/click - {safe_millify(int(game_data['total_bits_click']))} ({safe_millify(int(game_data['bits_click']))} * {safe_millify(int(game_data['bits_click_multiplier']))} * {safe_millify(int(((game_data['total_bits_second'])**0.8)**game_data['bits_click_scaling']))}\n"
+            f"bits/s - {safe_millify(int(game_data['total_bits_second']))} ({safe_millify(int(game_data['bits_second']))} * {safe_millify(int(game_data['bits_second_multiplier']))} * {safe_millify(int(((len(str(game_data['bits']))**0.3)**(game_data['bits_second_scaling']))))})"
+        ))
+
 def update_label():
-    while True:
-        sleep(1)
-        if root.winfo_exists():  # Check if root is still alive
-            millify_formatted = millify(game_data['bits'], precision=2)
-            label.config(text=f"Your bits {millify(game_data['bits'], precision=2)}")
-            #          total bits/s                             bits/s                          bits/s x                           ((x numbers in bits) ^ 0.3) ^ (bits/s scaling / 5)
-            game_data['total_bits_second'] = int(int(game_data['bits_second']) * int(game_data['bits_second_multiplier']) * int(((len(str(game_data['bits']))**0.8)**(game_data['bits_second_scaling']/5))))
-            #          total bits/click                            bits/click                         bits/click x                ((total_bits/s) ^ 0.8) ^ (bits/click scaling / 5)
-            game_data['total_bits_click'] = int(int(game_data.get('bits_click')) * int(game_data.get('bits_click_multiplier')) * int(((game_data['total_bits_second'])**0.8)**game_data['bits_click_scaling']))
-            #                                                     total_bits/click                      bits/click                       bits/click x                                  
-            info_stats.config(text=f"bits/click - {millify(int(game_data['total_bits_click']), precision=2)} ({millify(int(game_data['bits_click']), precision=2)} * {millify(int(game_data['bits_click_multiplier']), precision=2)} * {millify(int(((game_data['total_bits_second'])**0.8)**game_data['bits_click_scaling']), precision=2)})\nbits/s - {millify(int(game_data['total_bits_second']), precision=2)} ({millify(int(game_data['bits_second']), precision=2)} * {millify(int(game_data['bits_second_multiplier']), precision=2)} * {millify(int(((len(str(game_data['bits']))**0.3)**(game_data['bits_second_scaling']))), precision=2)})")
+    # while True:
+    #     sleep(1)
+    if root.winfo_exists():  # Check if root is still alive
+        millify_formatted = millify(game_data['bits'], precision=2)
+        label.config(text=f"Your bits {millify(game_data['bits'], precision=2)}")
+        #          total bits/s                             bits/s                          bits/s x                           ((x numbers in bits) ^ 0.3) ^ (bits/s scaling / 5)
+        game_data['total_bits_second'] = int(int(game_data['bits_second']) * int(game_data['bits_second_multiplier']) * int(((len(str(game_data['bits']))**0.8)**(game_data['bits_second_scaling']/5))))
+        #          total bits/click                            bits/click                         bits/click x                ((total_bits/s) ^ 0.8) ^ (bits/click scaling / 5)
+        game_data['total_bits_click'] = int(int(game_data.get('bits_click')) * int(game_data.get('bits_click_multiplier')) * int(((game_data['total_bits_second'])**0.8)**game_data['bits_click_scaling']))
+        #                                                     total_bits/click                      bits/click                       bits/click x                                  
 
 # {millify(int(((len(str(game_data['bits']))**0.3)**(game_data['bits_second_scaling']))), precision=2)}
 
 def on_THE_button_click():  # on THE button click
     global game_data
     game_data['bits'] += game_data['total_bits_click']
-    # root.after(0, update_label)
+    root.after(0, update_label)
 
 def bits_per_second():
     while game_data.get("bps_running", False):
-        # if root.winfo_exists():  # Only update if the window is still open
-        #     root.after(0, update_label)
-        # else:
-        #     break  # Exit loop if root is closed
+        if root.winfo_exists():  # Only update if the window is still open
+            root.after(0, update_label)
+        else:
+            break  # Exit loop if root is closed
 
         if game_data['total_bits_second'] >= 10:
             sleep(0.1)
@@ -176,7 +192,7 @@ def action_1(button):
         game_data['bits_click_price'] += int((game_data['bits_click_price']**0.5)*10)
         game_data['bits_click'] += 1
         button.config(text=f"bits/click - {millify(game_data['bits_click_price'], precision=2)}")
-        # root.after(0, update_label)
+        root.after(0, update_label)
     elif game_data['bits'] < game_data['bits_click_price']:
         original_text = button.cget("text")
         threading.Thread(target=rename, args=(button, original_text), daemon=True).start()
@@ -188,7 +204,7 @@ def action_2(button):
         game_data['bits_second'] += 1
 
         button.config(text=f"bits/s - {millify(game_data['auto_cost'], precision=2)}")
-        # root.after(0, update_label)
+        root.after(0, update_label)
 
         # Restart bits_per_second thread if not running
         if not game_data.get("bps_running", False):  
@@ -205,7 +221,7 @@ def action_3(button):
         game_data['bits_click_multiplier_price'] += int((game_data['bits_click_multiplier_price'] ** 0.5) * 50)
         game_data['bits_click_multiplier'] += 1
         button.config(text=f"bits/click multiplier - {millify(game_data['bits_click_multiplier_price'], precision=2)}")
-        # root.after(0, update_label)
+        root.after(0, update_label)
     
     else:
         original_text = button.cget("text")
@@ -217,7 +233,7 @@ def action_4(button):
         game_data['bits_second_multiplier_price'] += int((game_data['bits_second_multiplier_price'] ** 0.5) * 60)
         game_data['bits_second_multiplier'] += 1
         button.config(text=f"bits/s multiplier - {millify(game_data['bits_second_multiplier_price'], precision=2)}")
-        # root.after(0, update_label)
+        root.after(0, update_label)
     
     else:
         original_text = button.cget("text")
@@ -310,7 +326,7 @@ def action_14(button):
         game_data['bits_click_scaling'] += 1
         game_data['bits_click_scaling_price'] += int((game_data['bits_click_scaling_price'] ** 0.5) * 500)
         button.config(text=f"bits/click scaling - {millify(game_data['bits_click_scaling_price'], precision=2)}")
-        # root.after(0, update_label)
+        root.after(0, update_label)
 
     else:
         original_text = button.cget("text")
@@ -322,7 +338,7 @@ def action_15(button):
         game_data['bits_second_scaling'] += 1
         game_data['bits_second_scaling_price'] += int(game_data['bits_second_scaling_price'] * 2.7)
         button.config(text=f"bits/s scaling - {millify(game_data['bits_second_scaling_price'], precision=2)}")
-        # root.after(0, update_label)
+        root.after(0, update_label)
 
 
     else:
