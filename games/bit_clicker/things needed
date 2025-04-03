@@ -1,0 +1,31 @@
+Click-Based Upgrades
+    Double Tap – Every click has a 10% chance to trigger twice.
+    Critical Clicks – 5% chance for clicks to give 3x the bits.
+    Click Combo – Clicking quickly in succession increases the bits per click (resets after 3 seconds of no clicks).
+
+Passive Income Upgrades
+    Automation Boost – Increases passive bits per second by 20%.
+    Turbo Mode – Passive income rate doubles for 10 seconds every minute.
+    Overclocked Generators – Every minute, your passive bits per second permanently increase by 1%.
+
+fun upgrades
+    "Dark Mode" – purely cosmetic but could give a slight boost to production just for fun!
+
+<!-- Scaling & Economy Upgrades
+    Discount Coupons – Reduces all upgrade costs by 5%.
+    Prestige System – Reset progress for a permanent multiplier to bits per click & passive income.
+    Investment Plan – Every 10 seconds, you gain a small interest bonus based on your total bits. -->
+
+
+
+Unlocking Prestige Button:
+    The button appears only after reaching a set number of bits (e.g., 1 million).
+    It resets progress but grants "prestige points" that unlock new upgrades.
+    New Prestige Window:
+    Clicking the button opens a new Tkinter window (Toplevel()).
+    This window has prestige-specific upgrades that persist across resets.
+    Prestige Effects:
+    Each prestige level could give a multiplier to bits gained.
+    Special permanent upgrades (e.g., auto-click speed boost, cheaper upgrades, bonus bits per click).
+    Unique mechanics, like an offline earnings boost.
+    Would you want the prestige points to scale exponentially (more bits = more points) or a fixed amount per reset?
